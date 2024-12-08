@@ -43,11 +43,7 @@ int GetRandomRange(int min, int max)
 	return min + rand() % ((max + 1) - min);
 }
 
-int* DefinePalierLevel(int* p)
-{
-	// DEFINI LE PALIER DES NIVEAUX D'EXPERIENCES REQUIS POUR LEVELUP
 
-}
 
 void EditCircle(sf::CircleShape& circle, sf::Color color, float taille, sf::Vector2f circlePosition)
 {	

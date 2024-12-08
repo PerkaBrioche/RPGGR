@@ -3,89 +3,156 @@
 Character Player;
 Character Enemy;
 
-sf::Text lifePlayerText;
-sf::Text currentLifePlayerText;
-sf::Text lifeEnemyText;
-sf::Text currentLifeEnemyText;
+sf::Text textLifePlayer;
+sf::Text textLifeEnemy;
+sf::Font arialFont;
 
+sf::RectangleShape but_Action_Attack;
+sf::RectangleShape but_Action_Defense;
 
-void main()
+bool isPlayerTurn;
+int indexButton;
+
+int main()
 {
     Initalization();
+   InitializePlayer(Player);
+   Player.Info = LaunchStats();
+   Update();
 }
 
-void Initalization() 
+void Update() 
 {
-    sf::Font arialFont;
-    std::string fontArial = GetDirectories("Assets") + "arial.ttf";
-    arialFont.loadFromFile(fontArial);
-
-    InitializePlayer(Player);
-
-    WriteText(arialFont, lifePlayerText, currentLifePlayerText, "Life : ", { 40.0f, 40.0f }, { 0.5f, 0.5f }, Player.Info.actualLife, Player.Info.baseLife);
-    WriteText(arialFont, lifeEnemyText, currentLifeEnemyText, "Life Enemy : ", { 500.0f, 40.0f }, { 0.5f, 0.5f }, Enemy.Info.actualLife, Enemy.Info.baseLife);
+    sf::RenderWindow window(sf::VideoMode(800, 600), "RPG");
 
     CreateUI();
-    DisplaySFML();
     NewRound();
-}
 
-void CreateUI(){
-    sf::RectangleShape carre;
-    sf::RectangleShape Attck1;
-    sf::RectangleShape Attck2;
-    CreateRect(carre, 760, 560, sf::Color::Black, sf::Color::White, 10.0f, { 20.0f, 20.0f });
-    CreateRect(Attck1, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 150.0f, 450.0f });
-    CreateRect(Attck2, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 500.0f, 450.0f });
-}
-
-void WriteText(sf::Font fontUsed, sf::Text textLife, sf::Text currentLife, std::string life, sf::Vector2f positionText, sf::Vector2f scale, int currentHealth, int maxhealth)
-{
-    textLife.setFont(fontUsed);
-    textLife.setString(life);
-    textLife.setPosition(positionText);
-    textLife.setScale(scale);
-    currentLife.setFont(fontUsed);
-    currentLife.setString(std::to_string(currentHealth) + "/" + std::to_string(maxhealth));
-    currentLife.setPosition(positionText.x + 80.0f, positionText.y);
-    currentLife.setScale(scale);
-}
-
-void DisplaySFML()
-{
-    sf::RenderWindow window(sf::VideoMode(800, 600), "ChronoSpacer");
-    // Initialise everything below
-    // Game loop
-
-    
+    sf::Clock clock;
+    clock.restart();
 
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
-            // Process any input event here
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
         }
-        window.clear();
-        window.draw(Player.circleChara);
-        window.draw(Enemy.circleChara);
-        // Whatever I want to draw goes here
-        window.display();
+        if (isPlayerTurn)
+        {
+            PlayerRound();
+        }
+        else
+        {
+            IARound();
+        }
+        if (clock.getElapsedTime().asSeconds() > 0.8f)
+        {
+            // UPDATE GAME ICI ( 1 TICK = 0.8Fs;
+
+
+            clock.restart();
+        }
+        RenderGame(window);
+    }
+}
+
+void WaitFor(float milliseconds) 
+{
+    Sleep(milliseconds);
+    CheckLife();
+}
+
+void CheckLife() 
+{
+    std::cout << "CHECK LIFE" << std::endl;
+
+    if (Player.Info.actualLife == 0) 
+    {
+        std::cout << "PLAYER DEFEATED" << std::endl;
+        return;
+    }
+    if (Enemy.Info.actualLife == 0)
+    {
+        std::cout << "ENEMY DEFEATED" << std::endl;
+        int range = Enemy.Info.baseLife;
+        Player.ReceiveXp(GetRandomRange(range - 3, range + 2));
+
+        NewRound();
+
+        return;
     }
 
 }
 
+void RenderGame(sf::RenderWindow& window)
+{
+    window.clear();
+    window.draw(Player.circleChara);
+    window.draw(Enemy.circleChara);
+    window.draw(Enemy.circleChara);
+    window.draw(but_Action_Attack);
+    window.draw(but_Action_Defense);
+    window.draw(textLifePlayer);
+    window.draw(textLifeEnemy);
+    window.display();
+}
+
+void Initalization() 
+{
+
+    std::string fontArialPath = GetDirectories("Assets") + "arial.ttf";
+    if (arialFont.loadFromFile(fontArialPath))
+    {
+        textLifePlayer.setFont(arialFont);
+        textLifeEnemy.setFont(arialFont);
+    }
+
+    std::cout << "END INITIALIZATION" << std::endl;
+
+}
+
+void UpdateLifeTexts()
+{
+    textLifePlayer.setString("Life : " + std::to_string(Player.Info.actualLife));
+    textLifeEnemy.setString("Life : " + std::to_string(Enemy.Info.actualLife));
+}
+void CreateUI(){
+
+    textLifePlayer = EditText("Life : " + Player.Info.actualLife, { 40.0f, 40.0f }, { 0.5f, 0.5f });
+    textLifeEnemy = EditText("Life : " + Enemy.Info.actualLife, { 500.0f, 40.0f }, { 0.5f, 0.5f });
+    CreateRect(but_Action_Attack, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 150.0f, 450.0f });
+    CreateRect(but_Action_Defense, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 500.0f, 450.0f });
+}
+
+sf::Text EditText(std::string string, sf::Vector2f positionText, sf::Vector2f scale)
+{
+   // if (arialFont.loadFromFile() { std::cerr << "arial not found" << std::endl; return; }
+    sf::Text textToModify;
+    textToModify.setFont(arialFont);
+    textToModify.setString(string);
+    textToModify.setPosition(positionText);
+    textToModify.setScale(scale);
+    return textToModify;
+}
+
+
+
 void NewRound()
 {
     // L'ENNEMI A ETE TUE ON LANCE UN NOUVEAU TOUR
+
     Enemy = InitializeEnemy(Player);
+    std::cout << "A new enemy has appeared!" << std::endl;
+    std::cout << "Enemy stats: Life = " << Enemy.Info.actualLife << ", Damage = " << Enemy.Info.damage << std::endl;
     ResetRound();
+    UpdateLifeTexts();
 }
 
 void AttackEnemy()
 {
     Player.InflictDamage(Enemy);
+    UpdateLifeTexts();
 }
 void DefendPlayer() 
 {
@@ -94,54 +161,61 @@ void DefendPlayer()
 
 void ResetRound()
 {
+    if (Player.isDefending)
+    {
+        Player.isDefending = false;
+    }
     // ON RESET LES ACTIONS
-    Enemy.isDefending = false;
-    Player.isDefending = false;
-    PlayerRound();
+    isPlayerTurn = true;
 }
 
 void PlayerRound() 
 {
-    int index = 0;
-    bool spacePressed = false;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) // Exemple : bouton d'attaque
+    {
+        std::cout << "PLAYER ATTACK" << std::endl;
 
-
-    if (index == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        if (!spacePressed) {
-            Enemy.GetDamage();
-            spacePressed = true;
-        }
+        AttackEnemy();
+        isPlayerTurn = false;
+        WaitFor(1000);
     }
-    else {
-        spacePressed = false;
-    }
-
-    if (index == 1 && sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        if (!spacePressed) {
-            Player.Defend();
-            spacePressed = true;
-        }
-    }
-    else {
-        spacePressed = false;
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) // Exemple : bouton de défense
+    {
+        std::cout << "PLAYER DEFEND" << std::endl;
+        DefendPlayer();
+        isPlayerTurn = false;
+        WaitFor(1000);
     }
 }
 
 void IARound() 
 {
-    // C'est a L'IA DE JOUER - DEFENDRE OU ATTAQUER
-
-    int randomAction = GetRandomRange(1, 5);
-    if (randomAction > 1 && randomAction < 3) 
+    if (Enemy.isDefending) 
     {
+        Enemy.isDefending = false;
+    }
+    std::cout << "IA TURN" << std::endl;
+    // C'est a L'IA DE JOUER - DEFENDRE OU ATTAQUER
+    if (isPlayerTurn) { return; }
+    int randomAction = GetRandomRange(1, 8);
+    if (randomAction >= 1 && randomAction <= 3) 
+    {
+        std::cout << "IA INFLICT DAMAGE" << std::endl;
         Enemy.InflictDamage(Player);
+        UpdateLifeTexts();
+    }
+    else if (randomAction >= 4 && randomAction <= 6)
+    {
+        std::cout << "DEFEND" << std::endl;
+        Enemy.Defend();
     }
     else 
     {
-        Enemy.Defend();
+        std::cout << "ENEMY DO NOTHING" << std::endl;
     }
-
+    WaitFor(1000);
     ResetRound();
+
 }
 
 

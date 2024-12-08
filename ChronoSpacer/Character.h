@@ -16,34 +16,35 @@ int GetDamage();
 struct CharacterStats
 {
     int level;
-    int defense;
     int experience;
     int damage;
+    int criticals;
+    int defense;
     int baseLife;
     int actualLife = baseLife;
 };
 
 struct Character
 {
-    //sf::Sprite characterTexture;
-
     sf::CircleShape circleChara;
     CharacterStats Info;
     bool isDefending = false;
     bool isEnemy = true;
-    int GetDamage()
-    {
-        return Info.damage * Info.level;
-    }
 
     void ReceiveDamage(int damage)
     {
+        std::cout << "RECEIVE DAMAGE : " << damage << std::endl;
+
         if (isDefending)
         {
             damage = Clamp(damage - Info.defense, 0, damage);
+            std::cout << "DEFEND AND TANK : " << Info.defense << "DAMAGE LEFT : " << damage << std::endl;
         }
         Info.actualLife -= damage;
-        if (Info.actualLife < 0) Info.actualLife = 0;
+        if (Info.actualLife <= 0)
+        { 
+            Info.actualLife = 0;
+        };
     }
 
     void Defend() 
@@ -53,13 +54,14 @@ struct Character
 
     void ReceiveXp(int xp)
     {
+        std::cout << "RECEIVE XP : " << xp << std::endl;
         Info.experience += xp;
         CheckIfLevelUp();
     }
 
     void InflictDamage(Character& enemy)
     {
-        enemy.ReceiveDamage(GetDamage());
+        enemy.ReceiveDamage(Info.damage);
     }
 
     void CheckIfLevelUp()
@@ -68,10 +70,13 @@ struct Character
 
         if (Info.experience >= paliers[Info.level])
         {
+            std::cout << "LEVEL UP " << std::endl;
+
             Info.experience = 0;
             Info.level++;
-            Info.damage += 5;
-            Info.defense += 3;
+            Info.baseLife += GetRandomRange(3, 5);
+            Info.damage += GetRandomRange(3,5);
+            Info.defense += GetRandomRange(3, 5);
             Info.actualLife = Info.baseLife;
         }
     }
