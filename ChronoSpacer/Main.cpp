@@ -171,15 +171,30 @@ void ResetRound()
 
 void PlayerRound() 
 {
+
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) // Exemple : bouton d'attaque
     {
-        std::cout << "PLAYER ATTACK" << std::endl;
+        but_Action_Attack.setOutlineColor(sf::Color::Red);
+        but_Action_Defense.setOutlineColor(sf::Color::White);
+        indexButton = 1;
+    }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) // Exemple : bouton de défense
+    {
+        but_Action_Defense.setOutlineColor(sf::Color::Red);
+        but_Action_Attack.setOutlineColor(sf::Color::White);
+        indexButton = 2;
+    }
 
+
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && indexButton == 1)
+    {
+        std::cout << "PLAYER ATTACK" << std::endl;
         AttackEnemy();
         isPlayerTurn = false;
         WaitFor(1000);
     }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) // Exemple : bouton de défense
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && indexButton == 2)
     {
         std::cout << "PLAYER DEFEND" << std::endl;
         DefendPlayer();
