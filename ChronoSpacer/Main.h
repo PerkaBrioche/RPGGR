@@ -5,6 +5,7 @@
 #include "Tools.h"
 #include "Character.h"
 #include "ChooseStats.h"
+#include "Particule.h"
 
 void Initalization();
 void NewRound();
@@ -17,4 +18,6 @@ void IARound();
 void CheckLife();
 void WaitFor(float milliseconds);
 void Update();
+
+
 

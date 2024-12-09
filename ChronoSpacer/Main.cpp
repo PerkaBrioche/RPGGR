@@ -13,6 +13,8 @@ sf::RectangleShape but_Action_Defense;
 bool isPlayerTurn;
 int indexButton;
 
+std::list<Particle> particles;
+
 int main()
 {
     Initalization();
@@ -53,6 +55,8 @@ void Update()
 
             clock.restart();
         }
+        float deltaTime = clock.restart().asSeconds();
+        UpdateParticles(particles, deltaTime);
         RenderGame(window);
     }
 }
@@ -95,6 +99,12 @@ void RenderGame(sf::RenderWindow& window)
     window.draw(but_Action_Defense);
     window.draw(textLifePlayer);
     window.draw(textLifeEnemy);
+
+
+    for (const Particle& particle : particles)
+    {
+        window.draw(particle.shape);
+    }
     window.display();
 }
 
@@ -152,7 +162,9 @@ void NewRound()
 void AttackEnemy()
 {
     Player.InflictDamage(Enemy);
+    InstanceParticule(particles, 10, { 300,300 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
+   
 }
 void DefendPlayer() 
 {
@@ -172,13 +184,13 @@ void ResetRound()
 void PlayerRound() 
 {
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) // Exemple : bouton d'attaque
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) // Exemple : bouton d'attaque
     {
         but_Action_Attack.setOutlineColor(sf::Color::Red);
         but_Action_Defense.setOutlineColor(sf::Color::White);
         indexButton = 1;
     }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) // Exemple : bouton de défense
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) // Exemple : bouton de défense
     {
         but_Action_Defense.setOutlineColor(sf::Color::Red);
         but_Action_Attack.setOutlineColor(sf::Color::White);

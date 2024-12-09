@@ -136,12 +136,14 @@
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="ChooseStats.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Particule.cpp" />
     <ClCompile Include="Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Character.h" />
     <ClInclude Include="ChooseStats.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="Particule.h" />
     <ClInclude Include="Tools.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
