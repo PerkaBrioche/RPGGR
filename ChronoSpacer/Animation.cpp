@@ -1,17 +1,26 @@
 #include "Animation.h"
 
 
+float velocity = 200.f;
+float maxDistance = 50.f;
+bool animating = false;
+bool returning = false;
+sf::Vector2f currentVelocity(velocity, 0.f);
+float traveledDistance = 0.f;
 
 
+void BeginMovement( sf::CircleShape& square,const sf::Vector2f& startPosition) {
+    if (!animating) {
+        animating = true;
+        returning = false;
+        traveledDistance = 0.f;
+        square.setPosition(startPosition);
+        currentVelocity = sf::Vector2f(velocity, 0.f);
+    }
+}
 
-void DoAnimation(sf::CircleShape& square, float& traveledDistance, bool& animating, bool& returning,
-    sf::Vector2f& currentVelocity, float velocity, float maxDistance,
-    const sf::Vector2f& startPosition) {
-    sf::Clock clockForAnimation;
-    clockForAnimation.restart();
-    float deltaTime = clockForAnimation.restart().asSeconds();
 
-    std::cout << "Aniamtion" << std::endl;
+void DoAnimation(sf::CircleShape& square,float deltaTime, const sf::Vector2f& startPosition) {
     if (animating) {
         if (!returning) {
             square.move(currentVelocity * deltaTime);
@@ -28,18 +37,11 @@ void DoAnimation(sf::CircleShape& square, float& traveledDistance, bool& animati
 
             if (traveledDistance <= 0.f) {
                 animating = false;
+                returning = false;
                 square.setPosition(startPosition);
             }
         }
     }
 }
 
-void BeginMovement(bool& animating, bool& returning, float& traveledDistance, sf::CircleShape& square,
-    const sf::Vector2f& startPosition) {
-    if (!animating) {
-        animating = true;
-        returning = false;
-        traveledDistance = 0.f;
-        square.setPosition(startPosition);
-    }
-}
+

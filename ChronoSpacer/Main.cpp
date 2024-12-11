@@ -16,14 +16,8 @@ int indexButton;
 
 std::list<Particle> particles;
 
-/// ANIMATION AU MOMENT DE L ATTAQUE
 
-float velocity = 200.f;
-float maxDistance = 300.f;
-bool animating = false;
-bool returning = false;
-sf::Vector2f currentVelocity(velocity, 0.f);
-float traveledDistance = 0.f;
+
 
 int main()
 {
@@ -67,6 +61,7 @@ void Update()
         }
         float deltaTime = clock.restart().asSeconds();
         UpdateParticles(particles, deltaTime);
+        DoAnimation(Enemy.circleChara,deltaTime, { 525, 150 });
         RenderGame(window);
     }
 }
@@ -140,9 +135,9 @@ void UpdateLifeTexts()
 }
 void CreateUI(){
 
-    textLifePlayer = EditText("Life : " + Player.Info.actualLife, { 40.0f, 40.0f }, { 0.5f, 0.5f });
-    textLevelPlayer = EditText("Level : " + Player.Info.level, { 40.0f, 20.0f }, { 0.5f, 0.5f });
-    textLifeEnemy = EditText("Life : " + Enemy.Info.actualLife, { 500.0f, 40.0f }, { 0.5f, 0.5f });
+    textLifePlayer = EditText("Life : " + Player.Info.actualLife, { 200.f, 100.f }, { 0.5f, 0.5f });
+    textLevelPlayer = EditText("Level : " + Player.Info.level, { 195.f, 80.f }, { 0.5f, 0.5f });
+    textLifeEnemy = EditText("Life : " + Enemy.Info.actualLife, { 550.f, 100.f }, { 0.5f, 0.5f });
     CreateRect(but_Action_Attack, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 150.0f, 450.0f });
     CreateRect(but_Action_Defense, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 500.0f, 450.0f });
 }
@@ -173,8 +168,7 @@ void AttackEnemy()
 {
     float deltaTimeForAnimation = 0.0f;
     Player.InflictDamage(Enemy);
-    BeginMovement(animating, returning, traveledDistance, Enemy.circleChara, { 525, 150 });
-    DoAnimation(Enemy.circleChara, traveledDistance, animating, returning, currentVelocity, velocity, maxDistance,{ 525, 150 });
+    BeginMovement(Enemy.circleChara, { 525, 150 });
     InstanceParticule(particles, 10, { 575,190 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
    
