@@ -4,6 +4,7 @@ Character Player;
 Character Enemy;
 
 sf::Text textLifePlayer;
+sf::Text textLevelPlayer;
 sf::Text textLifeEnemy;
 sf::Font arialFont;
 
@@ -15,9 +16,18 @@ int indexButton;
 
 std::list<Particle> particles;
 
+/// ANIMATION AU MOMENT DE L ATTAQUE
+
+float velocity = 200.f;
+float maxDistance = 300.f;
+bool animating = false;
+bool returning = false;
+sf::Vector2f currentVelocity(velocity, 0.f);
+float traveledDistance = 0.f;
+
 int main()
 {
-    Initalization();
+   Initalization();
    InitializePlayer(Player);
    Player.Info = LaunchStats();
    Update();
@@ -98,6 +108,7 @@ void RenderGame(sf::RenderWindow& window)
     window.draw(but_Action_Attack);
     window.draw(but_Action_Defense);
     window.draw(textLifePlayer);
+    window.draw(textLevelPlayer);
     window.draw(textLifeEnemy);
 
 
@@ -115,21 +126,22 @@ void Initalization()
     if (arialFont.loadFromFile(fontArialPath))
     {
         textLifePlayer.setFont(arialFont);
+        textLevelPlayer.setFont(arialFont);
         textLifeEnemy.setFont(arialFont);
     }
-
     std::cout << "END INITIALIZATION" << std::endl;
-
 }
 
 void UpdateLifeTexts()
 {
     textLifePlayer.setString("Life : " + std::to_string(Player.Info.actualLife));
+    textLevelPlayer.setString("Level : " + std::to_string(Player.Info.level));
     textLifeEnemy.setString("Life : " + std::to_string(Enemy.Info.actualLife));
 }
 void CreateUI(){
 
     textLifePlayer = EditText("Life : " + Player.Info.actualLife, { 40.0f, 40.0f }, { 0.5f, 0.5f });
+    textLevelPlayer = EditText("Level : " + Player.Info.level, { 40.0f, 20.0f }, { 0.5f, 0.5f });
     textLifeEnemy = EditText("Life : " + Enemy.Info.actualLife, { 500.0f, 40.0f }, { 0.5f, 0.5f });
     CreateRect(but_Action_Attack, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 150.0f, 450.0f });
     CreateRect(but_Action_Defense, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 500.0f, 450.0f });
@@ -146,8 +158,6 @@ sf::Text EditText(std::string string, sf::Vector2f positionText, sf::Vector2f sc
     return textToModify;
 }
 
-
-
 void NewRound()
 {
     // L'ENNEMI A ETE TUE ON LANCE UN NOUVEAU TOUR
@@ -161,7 +171,10 @@ void NewRound()
 
 void AttackEnemy()
 {
+    float deltaTimeForAnimation = 0.0f;
     Player.InflictDamage(Enemy);
+    BeginMovement(animating, returning, traveledDistance, Enemy.circleChara, { 525, 150 });
+    DoAnimation(Enemy.circleChara, traveledDistance, animating, returning, currentVelocity, velocity, maxDistance,{ 525, 150 });
     InstanceParticule(particles, 10, { 575,190 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
    

@@ -6,6 +6,7 @@
 #include "Character.h"
 #include "ChooseStats.h"
 #include "Particule.h"
+#include "Animation.h"
 
 void Initalization();
 void NewRound();
