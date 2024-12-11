@@ -162,7 +162,7 @@ void NewRound()
 void AttackEnemy()
 {
     Player.InflictDamage(Enemy);
-    InstanceParticule(particles, 10, { 300,300 }, sf::Color::White, 25, 35, 5, 1);
+    InstanceParticule(particles, 10, { 575,190 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
    
 }
@@ -229,6 +229,7 @@ void IARound()
     {
         std::cout << "IA INFLICT DAMAGE" << std::endl;
         Enemy.InflictDamage(Player);
+        InstanceParticule(particles, 10, { 215,190 }, sf::Color::White, 25, 35, 5, 1);
         UpdateLifeTexts();
     }
     else if (randomAction >= 4 && randomAction <= 6)
