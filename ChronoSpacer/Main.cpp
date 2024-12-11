@@ -16,7 +16,14 @@ int indexButton;
 
 std::list<Particle> particles;
 
-
+bool animatingPlayer = false;
+bool returningPlayer = false;
+bool animatingEnemy = false;
+bool returningEnemy = false;
+float maxDistance = 50.f;
+float maxDistancePlayer = -50.f;
+float velocity = 200.f;
+float velocityPlayer = -200.f;
 
 
 int main()
@@ -61,7 +68,8 @@ void Update()
         }
         float deltaTime = clock.restart().asSeconds();
         UpdateParticles(particles, deltaTime);
-        DoAnimation(Enemy.circleChara,deltaTime, { 525, 150 });
+        DoAnimation(Enemy.circleChara,  deltaTime, { 525, 150 },  velocity, maxDistance, animatingEnemy,  returningEnemy);
+        DoAnimation(Player.circleChara, deltaTime, { 175, 150 },  velocityPlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
         RenderGame(window);
     }
 }
@@ -168,7 +176,7 @@ void AttackEnemy()
 {
     float deltaTimeForAnimation = 0.0f;
     Player.InflictDamage(Enemy);
-    BeginMovement(Enemy.circleChara, { 525, 150 });
+    BeginMovement(Enemy.circleChara, { 525, 150 }, velocity, maxDistance, animatingEnemy,returningEnemy);
     InstanceParticule(particles, 10, { 575,190 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
    
@@ -236,6 +244,7 @@ void IARound()
     {
         std::cout << "IA INFLICT DAMAGE" << std::endl;
         Enemy.InflictDamage(Player);
+        BeginMovement(Player.circleChara, { 175, 150 }, velocityPlayer, maxDistancePlayer,animatingPlayer,returningPlayer);
         InstanceParticule(particles, 10, { 215,190 }, sf::Color::White, 25, 35, 5, 1);
         UpdateLifeTexts();
     }

@@ -1,47 +1,40 @@
 #include "Animation.h"
 
 
-float velocity = 200.f;
-float maxDistance = 50.f;
-bool animating = false;
-bool returning = false;
-sf::Vector2f currentVelocity(velocity, 0.f);
 float traveledDistance = 0.f;
 
 
-void BeginMovement( sf::CircleShape& square,const sf::Vector2f& startPosition) {
+void BeginMovement(sf::CircleShape& square, const sf::Vector2f& startPosition, float& velocity, float& maxDistance, bool& animating, bool& returning) {
     if (!animating) {
         animating = true;
         returning = false;
         traveledDistance = 0.f;
         square.setPosition(startPosition);
-        currentVelocity = sf::Vector2f(velocity, 0.f);
     }
 }
 
 
-void DoAnimation(sf::CircleShape& square,float deltaTime, const sf::Vector2f& startPosition) {
+void DoAnimation(sf::CircleShape& square, float deltaTime, const sf::Vector2f& startPosition, float& velocity, float& maxDistance, bool& animating, bool& returning) {
     if (animating) {
-        if (!returning) {
-            square.move(currentVelocity * deltaTime);
-            traveledDistance += velocity * deltaTime;
+        // Calcul de la direction actuelle
+        float direction = returning ? -1.f : 1.f;
 
-            if (traveledDistance >= maxDistance) {
-                returning = true;
-                currentVelocity = -currentVelocity;
-            }
+        // Calcul du déplacement
+        float moveDistance = velocity * deltaTime * direction;
+        square.move(moveDistance, 0.f);
+        traveledDistance += moveDistance;
+
+        // Vérification des limites
+        if (!returning && traveledDistance >= maxDistance) {
+            returning = true; // Début du retour
         }
-        else {
-            square.move(currentVelocity * deltaTime);
-            traveledDistance -= velocity * deltaTime;
-
-            if (traveledDistance <= 0.f) {
-                animating = false;
-                returning = false;
-                square.setPosition(startPosition);
-            }
+        else if (returning && traveledDistance <= 0.f) {
+            animating = false;  // Fin de l'animation
+            returning = false;
+            square.setPosition(startPosition); // Réinitialisation
         }
     }
 }
+
 
 
