@@ -6,6 +6,9 @@ Character Enemy;
 sf::Text textLifePlayer;
 sf::Text textLevelPlayer;
 sf::Text textLifeEnemy;
+sf::Text Attack;
+sf::Text Defense;
+sf::Text nbrEnemy;
 sf::Font arialFont;
 
 sf::RectangleShape but_Action_Attack;
@@ -14,16 +17,23 @@ sf::RectangleShape but_Action_Defense;
 bool isPlayerTurn;
 int indexButton;
 
+int indexEnemy = 0;
+
 std::list<Particle> particles;
 
 bool animatingPlayer = false;
 bool returningPlayer = false;
+float maxDistancePlayer = 50.f;
+float velocityPlayer = 200.f;
+float traveledDistancePlayer = 0.f;
+sf::Vector2f startPositionPlayer(175.f, 150.f); // Position de départ
+
 bool animatingEnemy = false;
 bool returningEnemy = false;
 float maxDistance = 50.f;
-float maxDistancePlayer = -50.f;
 float velocity = 200.f;
-float velocityPlayer = -200.f;
+float traveledDistanceEnemy  = 0.f;
+sf::Vector2f startPositionEnemy(525.f, 150.f); // Position de départ
 
 
 int main()
@@ -37,13 +47,10 @@ int main()
 void Update() 
 {
     sf::RenderWindow window(sf::VideoMode(800, 600), "RPG");
-
     CreateUI();
     NewRound();
-
     sf::Clock clock;
     clock.restart();
-
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -62,14 +69,12 @@ void Update()
         if (clock.getElapsedTime().asSeconds() > 0.8f)
         {
             // UPDATE GAME ICI ( 1 TICK = 0.8Fs;
-
-
             clock.restart();
         }
         float deltaTime = clock.restart().asSeconds();
         UpdateParticles(particles, deltaTime);
-        DoAnimation(Enemy.circleChara,  deltaTime, { 525, 150 },  velocity, maxDistance, animatingEnemy,  returningEnemy);
-        DoAnimation(Player.circleChara, deltaTime, { 175, 150 },  velocityPlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
+        DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
+        DoAnimation(Player.circleChara, deltaTime, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
         RenderGame(window);
     }
 }
@@ -113,6 +118,9 @@ void RenderGame(sf::RenderWindow& window)
     window.draw(textLifePlayer);
     window.draw(textLevelPlayer);
     window.draw(textLifeEnemy);
+    window.draw(Attack);
+    window.draw(Defense);
+    window.draw(nbrEnemy);
 
 
     for (const Particle& particle : particles)
@@ -131,6 +139,9 @@ void Initalization()
         textLifePlayer.setFont(arialFont);
         textLevelPlayer.setFont(arialFont);
         textLifeEnemy.setFont(arialFont);
+        Attack.setFont(arialFont);
+        Defense.setFont(arialFont);
+        nbrEnemy.setFont(arialFont);
     }
     std::cout << "END INITIALIZATION" << std::endl;
 }
@@ -140,12 +151,16 @@ void UpdateLifeTexts()
     textLifePlayer.setString("Life : " + std::to_string(Player.Info.actualLife));
     textLevelPlayer.setString("Level : " + std::to_string(Player.Info.level));
     textLifeEnemy.setString("Life : " + std::to_string(Enemy.Info.actualLife));
+    nbrEnemy.setString("Enemy " + std::to_string(indexEnemy));
 }
-void CreateUI(){
 
+void CreateUI(){
     textLifePlayer = EditText("Life : " + Player.Info.actualLife, { 200.f, 100.f }, { 0.5f, 0.5f });
     textLevelPlayer = EditText("Level : " + Player.Info.level, { 195.f, 80.f }, { 0.5f, 0.5f });
     textLifeEnemy = EditText("Life : " + Enemy.Info.actualLife, { 550.f, 100.f }, { 0.5f, 0.5f });
+    Attack = EditText("Attack", { 200.f, 400.f }, { 0.5f, 0.5f });
+    Defense = EditText("Defense", { 550.f, 400.f }, { 0.5f, 0.5f });
+    nbrEnemy = EditText("Enemy " + std::to_string(indexEnemy), { 540.f, 50.f }, { 0.6f, 0.6f });
     CreateRect(but_Action_Attack, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 150.0f, 450.0f });
     CreateRect(but_Action_Defense, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 500.0f, 450.0f });
 }
@@ -164,7 +179,7 @@ sf::Text EditText(std::string string, sf::Vector2f positionText, sf::Vector2f sc
 void NewRound()
 {
     // L'ENNEMI A ETE TUE ON LANCE UN NOUVEAU TOUR
-
+    indexEnemy++;
     Enemy = InitializeEnemy(Player);
     std::cout << "A new enemy has appeared!" << std::endl;
     std::cout << "Enemy stats: Life = " << Enemy.Info.actualLife << ", Damage = " << Enemy.Info.damage << std::endl;
@@ -176,11 +191,13 @@ void AttackEnemy()
 {
     float deltaTimeForAnimation = 0.0f;
     Player.InflictDamage(Enemy);
-    BeginMovement(Enemy.circleChara, { 525, 150 }, velocity, maxDistance, animatingEnemy,returningEnemy);
+    BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, false);
+
     InstanceParticule(particles, 10, { 575,190 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
    
 }
+
 void DefendPlayer() 
 {
     Player.Defend();
@@ -244,7 +261,8 @@ void IARound()
     {
         std::cout << "IA INFLICT DAMAGE" << std::endl;
         Enemy.InflictDamage(Player);
-        BeginMovement(Player.circleChara, { 175, 150 }, velocityPlayer, maxDistancePlayer,animatingPlayer,returningPlayer);
+        BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, true);
+
         InstanceParticule(particles, 10, { 215,190 }, sf::Color::White, 25, 35, 5, 1);
         UpdateLifeTexts();
     }

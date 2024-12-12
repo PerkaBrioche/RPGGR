@@ -1,40 +1,47 @@
 #include "Animation.h"
 
-
-float traveledDistance = 0.f;
-
-
-void BeginMovement(sf::CircleShape& square, const sf::Vector2f& startPosition, float& velocity, float& maxDistance, bool& animating, bool& returning) {
+// Fonction pour démarrer le mouvement
+void BeginMovement(sf::CircleShape& square, const sf::Vector2f& startPosition, float& velocity, float& traveledDistance, float& maxDistance, bool& animating, bool& returning, bool moveLeft) {
     if (!animating) {
         animating = true;
         returning = false;
         traveledDistance = 0.f;
+
+        // Configure la bonne direction selon le paramètre moveLeft
+        velocity = moveLeft ? -std::abs(velocity) : std::abs(velocity);
+
+        // Positionner au point de départ
         square.setPosition(startPosition);
     }
 }
 
-
-void DoAnimation(sf::CircleShape& square, float deltaTime, const sf::Vector2f& startPosition, float& velocity, float& maxDistance, bool& animating, bool& returning) {
+// Logique de mouvement avec retour
+void DoAnimation(sf::CircleShape& square, float deltaTime, const sf::Vector2f& startPosition, float& velocity, float& traveledDistance, float& maxDistance, bool& animating, bool& returning) {
     if (animating) {
-        // Calcul de la direction actuelle
-        float direction = returning ? -1.f : 1.f;
+        float moveDistance = velocity * deltaTime;
 
-        // Calcul du déplacement
-        float moveDistance = velocity * deltaTime * direction;
-        square.move(moveDistance, 0.f);
-        traveledDistance += moveDistance;
+        if (!returning) {
+            // On se déplace vers la position maximale
+            square.move(moveDistance, 0.f);
+            traveledDistance += std::abs(moveDistance);
 
-        // Vérification des limites
-        if (!returning && traveledDistance >= maxDistance) {
-            returning = true; // Début du retour
+            if (traveledDistance >= maxDistance) {
+                // On atteint la distance maximale, on commence le retour
+                returning = true;
+            }
         }
-        else if (returning && traveledDistance <= 0.f) {
-            animating = false;  // Fin de l'animation
-            returning = false;
-            square.setPosition(startPosition); // Réinitialisation
+        else {
+            // On revient vers la position de départ
+            square.move(-moveDistance, 0.f);
+            traveledDistance -= std::abs(moveDistance);
+
+            if (traveledDistance <= 0.f) {
+                // Fin de l'animation - on est de retour à la position de départ
+                square.setPosition(startPosition);
+                animating = false;  // Arrêter l'animation
+                returning = false;  // Réinitialiser l'état de retour
+                traveledDistance = 0.f; // Réinitialiser la distance
+            }
         }
     }
 }
-
-
-
