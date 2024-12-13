@@ -14,9 +14,6 @@ sf::Font arialFont;
 sf::RectangleShape but_Action_Attack;
 sf::RectangleShape but_Action_Defense;
 
-sf::Clock delayClock;
-bool waitingForEnemy = false;
-
 bool isPlayerTurn;
 int indexButton;
 
