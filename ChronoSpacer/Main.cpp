@@ -46,13 +46,10 @@ int main()
 void Update()
 {
     sf::RenderWindow window(sf::VideoMode(800, 600), "RPG");
-
     CreateUI();
     NewRound();
-
     sf::Clock clock;
     clock.restart();
-
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -60,9 +57,7 @@ void Update()
                 window.close();
             }
         }
-
         float deltaTime = clock.restart().asSeconds();
-
         if (isPlayerTurn)
         {
             DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
@@ -75,14 +70,9 @@ void Update()
         }
         if (clock.getElapsedTime().asSeconds() > 0.8f)
         {
-            // UPDATE GAME ICI ( 1 TICK = 0.8Fs;
-
-
             clock.restart();
         }
         UpdateParticles(particles, deltaTime);
-
-
         RenderGame(window);
     }
 }
@@ -198,8 +188,6 @@ void NewRound()
 void AttackEnemy()
 {
     Player.InflictDamage(Enemy);
-    BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, false);
-    BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, false);
     InstanceParticule(particles, 10, { 575,190 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
 }
@@ -238,6 +226,8 @@ void PlayerRound()
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && indexButton == 1)
     {
         std::cout << "PLAYER ATTACK" << std::endl;
+        BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, false);
+        //BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, false);
         AttackEnemy();
         isPlayerTurn = false;
         WaitFor(1000);

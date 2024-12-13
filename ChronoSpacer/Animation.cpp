@@ -6,10 +6,8 @@ void BeginMovement(sf::CircleShape& square, const sf::Vector2f& startPosition, f
         animating = true;
         returning = false;
         traveledDistance = 0.f;
-
         // Configure la bonne direction selon le paramètre moveLeft
         velocity = moveLeft ? -std::abs(velocity) : std::abs(velocity);
-
         // Positionner au point de départ
         square.setPosition(startPosition);
     }
