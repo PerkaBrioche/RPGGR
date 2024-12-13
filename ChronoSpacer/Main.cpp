@@ -1,5 +1,15 @@
 #include "Main.h"
 
+enum GameStep {
+    InitRound,
+    PlayerSelect,
+    PlayerAnim,
+    EnemeySelect,
+    EnemeyAnim,
+    GameOver,
+};
+
+GameStep step = GameStep::InitRound;
 Character Player;
 Character Enemy;
 
@@ -16,7 +26,7 @@ sf::Font arialFont;
 sf::RectangleShape but_Action_Attack;
 sf::RectangleShape but_Action_Defense;
 
-bool isPlayerTurn;
+
 int indexButton;
 int percentageAttack = 0;
 
@@ -33,15 +43,15 @@ const sf::Color colorTextBar = sf::Color::Yellow;
 
 bool animatingPlayer = false;
 bool returningPlayer = false;
-float maxDistancePlayer = 50.f;
-float velocityPlayer = 200.f;
+float maxDistancePlayer = 300.f;
+float velocityPlayer = 800.f;
 float traveledDistancePlayer = 0.f;
 sf::Vector2f startPositionPlayer(175.f, 150.f); // Position de d�part
 
 bool animatingEnemy = false;
 bool returningEnemy = false;
-float maxDistance = 50.f;
-float velocity = 200.f;
+float maxDistance = 80.f;
+float velocity = 100.f;
 float traveledDistanceEnemy  = 0.f;
 sf::Vector2f startPositionEnemy(525.f, 150.f); // Position de d�part
 
@@ -72,16 +82,44 @@ void Update()
                 window.close();
             }
         }
-        deltaTime = clock.restart().asSeconds();
-        if (isPlayerTurn)
-        {
-            //DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
-            //DoAnimation(Player.circleChara, deltaTime, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
-            PlayerRound();
+        float deltaTime = clock.restart().asSeconds();
+
+        if (step==GameStep::GameOver) {
+            return;
         }
-        else
+        else if (step == GameStep::InitRound) {
+            ResetRound();
+            step = GameStep::PlayerSelect;
+        }
+ 
+        else if (step==GameStep::PlayerSelect)
         {
+           
+         bool hasPlayed= PlayerRound();
+         if (hasPlayed) {
+             step = GameStep::PlayerAnim;
+         }
+        }
+        else if (step == GameStep::PlayerAnim) {
+            DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
+            DoAnimation(Player.circleChara, deltaTime, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
+            if (animatingPlayer == false && animatingEnemy == false) {
+                step = GameStep::EnemeySelect;
+            }
+           
+        }
+        else if (step == GameStep::EnemeySelect) {
             IARound();
+            step = GameStep::EnemeyAnim;
+        }
+     
+        else if(step==GameStep::EnemeyAnim)
+        {
+            DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
+            DoAnimation(Player.circleChara, deltaTime, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
+            if (animatingPlayer == false && animatingEnemy == false) {
+                step = GameStep::InitRound;
+            }
         }
         if (clock.getElapsedTime().asSeconds() > 0.8f)
         {
@@ -128,6 +166,7 @@ void CheckLife()
     if (Player.Info.actualLife <= 0) 
     {
         std::cout << "PLAYER DEFEATED" << std::endl;
+        step = GameStep::GameOver;
         return;
     }
     if (Enemy.Info.actualLife <= 0)
@@ -242,12 +281,14 @@ void AttackEnemy()
 {
     Player.InflictDamage(Enemy);
     TriggerParticules(Enemy);
+    CheckLife();
     UpdateLifeTexts();
 }
 
 void DefendPlayer() 
 {
     Player.Defend();
+    CheckLife();
 }
 
 void ResetRound()
@@ -257,10 +298,12 @@ void ResetRound()
         Player.isDefending = false;
     }
     // ON RESET LES ACTIONS
-    isPlayerTurn = true;
+  
 }
 
-void PlayerRound()
+
+
+bool PlayerRound()
 {
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) // Exemple : bouton d'attaque
@@ -278,18 +321,23 @@ void PlayerRound()
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && indexButton == 1)
     {
+        maxDistancePlayer = 300.f;
+        velocityPlayer = 800.f;
+        maxDistance = 80.f;
+        velocity = 100.f;
         std::cout << "PLAYER ATTACK" << std::endl;
-        //BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, false);
-        //BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, false);
+        BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, false);
+        BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, false);
         AttackEnemy();
-        isPlayerTurn = false;
+        return true;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && indexButton == 2)
     {
         std::cout << "PLAYER DEFEND" << std::endl;
         DefendPlayer();
-        isPlayerTurn = false;
+        return true;
     }
+    return false;
 }
 
 void IARound()
@@ -302,9 +350,13 @@ void IARound()
     }
     std::cout << "IA TURN" << std::endl;
     // C'est a L'IA DE JOUER - DEFENDRE OU ATTAQUER
-    if (isPlayerTurn) { return; }
+    maxDistancePlayer = 80.f;
+    velocityPlayer = 100.f;
+    maxDistance = 300.f;
+    velocity = 800.f;
 
-
+    BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, true);
+    BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, true);
     int randomAction = GetRandomRange(0, 4);
 
     if (TryPercentage(percentageAttack))
@@ -312,6 +364,7 @@ void IARound()
         Enemy.InflictDamage(Player);
         ResetPercentage(percentageAttack, textPercentageAttack);
         TriggerParticules(Player);
+        CheckLife();
     }
     else 
     {
@@ -329,9 +382,6 @@ void IARound()
     UpdateBarUI(percentageAttack, progress, maxProgress, fillBar, backgroundBar);
     UpdateLifeTexts();
 
-    ResetRound();
-    CheckLife();
-}
 
 void TriggerParticules(struct Character Chara) {
     if (Chara.isDefending) {

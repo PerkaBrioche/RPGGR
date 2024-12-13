@@ -6,7 +6,7 @@
 #include "Main.h"
 
 const int palierCounts = 7; // Constante, pas besoin d'extern ici.
-extern int paliers[palierCounts]; // Déclaration du tableau.
+extern int paliers[palierCounts]; // Dï¿½claration du tableau.
 
 struct Character;
 struct CharacterStats;
