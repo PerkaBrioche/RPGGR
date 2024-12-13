@@ -14,6 +14,9 @@ sf::Font arialFont;
 sf::RectangleShape but_Action_Attack;
 sf::RectangleShape but_Action_Defense;
 
+sf::Clock delayClock;
+bool waitingForEnemy = false;
+
 bool isPlayerTurn;
 int indexButton;
 
@@ -35,22 +38,24 @@ float velocity = 200.f;
 float traveledDistanceEnemy  = 0.f;
 sf::Vector2f startPositionEnemy(525.f, 150.f); // Position de départ
 
-
 int main()
 {
-   Initalization();
-   InitializePlayer(Player);
-   Player.Info = LaunchStats();
-   Update();
+    Initalization();
+    InitializePlayer(Player);
+    Player.Info = LaunchStats();
+    Update();
 }
 
-void Update() 
+void Update()
 {
     sf::RenderWindow window(sf::VideoMode(800, 600), "RPG");
+
     CreateUI();
     NewRound();
+
     sf::Clock clock;
     clock.restart();
+
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -58,8 +63,13 @@ void Update()
                 window.close();
             }
         }
+
+        float deltaTime = clock.restart().asSeconds();
+
         if (isPlayerTurn)
         {
+            DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
+            DoAnimation(Player.circleChara, deltaTime, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
             PlayerRound();
         }
         else
@@ -69,17 +79,18 @@ void Update()
         if (clock.getElapsedTime().asSeconds() > 0.8f)
         {
             // UPDATE GAME ICI ( 1 TICK = 0.8Fs;
+
+
             clock.restart();
         }
-        float deltaTime = clock.restart().asSeconds();
         UpdateParticles(particles, deltaTime);
-        DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
-        DoAnimation(Player.circleChara, deltaTime, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
+
+
         RenderGame(window);
     }
 }
 
-void WaitFor(float milliseconds) 
+void WaitFor(float milliseconds)
 {
     Sleep(milliseconds);
     CheckLife();
@@ -89,12 +100,12 @@ void CheckLife()
 {
     std::cout << "CHECK LIFE" << std::endl;
 
-    if (Player.Info.actualLife == 0) 
+    if (Player.Info.actualLife <= 0) 
     {
         std::cout << "PLAYER DEFEATED" << std::endl;
         return;
     }
-    if (Enemy.Info.actualLife == 0)
+    if (Enemy.Info.actualLife <= 0)
     {
         std::cout << "ENEMY DEFEATED" << std::endl;
         int range = Enemy.Info.baseLife;
@@ -189,13 +200,11 @@ void NewRound()
 
 void AttackEnemy()
 {
-    float deltaTimeForAnimation = 0.0f;
     Player.InflictDamage(Enemy);
     BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, false);
-
+    BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, false);
     InstanceParticule(particles, 10, { 575,190 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
-   
 }
 
 void DefendPlayer() 
@@ -213,7 +222,7 @@ void ResetRound()
     isPlayerTurn = true;
 }
 
-void PlayerRound() 
+void PlayerRound()
 {
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) // Exemple : bouton d'attaque
@@ -228,8 +237,6 @@ void PlayerRound()
         but_Action_Attack.setOutlineColor(sf::Color::White);
         indexButton = 2;
     }
-
-
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && indexButton == 1)
     {
@@ -247,9 +254,9 @@ void PlayerRound()
     }
 }
 
-void IARound() 
+void IARound()
 {
-    if (Enemy.isDefending) 
+    if (Enemy.isDefending)
     {
         Enemy.isDefending = false;
     }
@@ -257,7 +264,7 @@ void IARound()
     // C'est a L'IA DE JOUER - DEFENDRE OU ATTAQUER
     if (isPlayerTurn) { return; }
     int randomAction = GetRandomRange(1, 8);
-    if (randomAction >= 1 && randomAction <= 3) 
+    if (randomAction >= 1 && randomAction <= 3)
     {
         std::cout << "IA INFLICT DAMAGE" << std::endl;
         Enemy.InflictDamage(Player);
@@ -271,7 +278,7 @@ void IARound()
         std::cout << "DEFEND" << std::endl;
         Enemy.Defend();
     }
-    else 
+    else
     {
         std::cout << "ENEMY DO NOTHING" << std::endl;
     }
