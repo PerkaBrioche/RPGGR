@@ -4,6 +4,7 @@
 #include "Tools.h"
 #include <algorithm>
 #include "Main.h"
+
 const int palierCounts = 7; // Constante, pas besoin d'extern ici.
 extern int paliers[palierCounts]; // Déclaration du tableau.
 
@@ -40,6 +41,11 @@ struct Character
         {
             damage = Clamp(damage - Info.defense, 0, damage);
             std::cout << "DEFEND AND TANK : " << Info.defense << "DAMAGE LEFT : " << damage << std::endl;
+            PlayParticles(4, circleChara.getPosition(), sf::Color::Cyan);
+        }
+        else 
+        {
+            PlayParticles(10, circleChara.getPosition(), sf::Color::Red);
         }
         Info.actualLife -= damage;
         if (Info.actualLife <= 0)

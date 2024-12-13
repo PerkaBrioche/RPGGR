@@ -194,6 +194,7 @@ sf::Text EditText(std::string string, sf::Vector2f positionText, sf::Vector2f sc
 void NewRound()
 {
     // L'ENNEMI A ETE TUE ON LANCE UN NOUVEAU TOUR
+    percentageAttack = 0;
     indexEnemy++;
     Enemy = InitializeEnemy(Player);
     AugmenterPercentageAttack(percentageAttack);
@@ -207,7 +208,6 @@ void NewRound()
 void AttackEnemy()
 {
     Player.InflictDamage(Enemy);
-    InstanceParticule(particles, 10, { 575,190 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
 }
 
@@ -299,5 +299,8 @@ void IARound()
 
 }
 
-
+void PlayParticles(int numberPart, sf::Vector2f pos, sf::Color color ) 
+{
+    InstanceParticule(particles, numberPart, { pos }, color, 25, 35, 5, 1);
+}
 
