@@ -43,8 +43,6 @@ int GetRandomRange(int min, int max)
 	return min + rand() % ((max + 1) - min);
 }
 
-
-
 void EditCircle(sf::CircleShape& circle, sf::Color color, float taille, sf::Vector2f circlePosition)
 {	
 	circle.setRadius(taille);
@@ -67,4 +65,56 @@ int Clamp(int value, int min, int max)
 	if (value < min) { return min; }
 	if (value > max) { return max; }
 	return value;
+}
+
+void AugmenterPercentageAttack(int& actualPercentage)
+{
+	int randomValue = GetRandomRange(5, 20);
+	actualPercentage = Clamp(actualPercentage + randomValue, 0, 100);
+	std::cout << "PERCENTAGE : " << actualPercentage << std::endl;
+}
+
+void ResetPercentage (int& actualPercentage)
+{
+	actualPercentage = 0;
+}
+
+bool TryPercentage(int actualPercentage) 
+{
+	int random = GetRandomRange(0, 101);
+	if (random < actualPercentage) { return true; } return false;
+}
+
+void EndOfGame() 
+{
+
+}
+
+void SetBarUI(sf::RectangleShape& fillBar, sf::RectangleShape& backgroundBar, sf::Color bgColor, sf::Color fillbarColor, sf::Vector2f position, sf::Vector2f scale) 
+{
+	// Rectangle de fond (piste du slider)
+
+	backgroundBar.setSize(scale);
+	backgroundBar.setFillColor(bgColor);
+	backgroundBar.setPosition(position);
+
+	// Rectangle de remplissage (jauge de progression)
+
+	fillBar.setSize({ 0, scale.y });
+	fillBar.setFillColor(fillbarColor);
+	fillBar.setPosition(position);
+}
+
+void UpdateBarUI(int newPercentage, float progress, float maxProgress, sf::RectangleShape& fillBar, sf::RectangleShape& backgroundBar)
+{
+	progress = newPercentage;
+	progress = std::max(0.0f, std::min(progress, maxProgress));
+
+	fillBar.setSize({ progress * (backgroundBar.getSize().x /100) , backgroundBar.getSize().y});
+
+	std::cout << newPercentage << std::endl;
+	std::cout << progress << std::endl;
+	std::cout << maxProgress << std::endl;
+	std::cout << backgroundBar.getSize().y << std::endl;
+
 }

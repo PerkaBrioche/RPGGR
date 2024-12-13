@@ -9,6 +9,7 @@ sf::Text textLifeEnemy;
 sf::Text Attack;
 sf::Text Defense;
 sf::Text nbrEnemy;
+sf::Text textPercentageAttack;
 sf::Font arialFont;
 
 sf::RectangleShape but_Action_Attack;
@@ -16,24 +17,32 @@ sf::RectangleShape but_Action_Defense;
 
 bool isPlayerTurn;
 int indexButton;
+int percentageAttack = 0;
 
 int indexEnemy = 0;
 
 std::list<Particle> particles;
+
+sf::RectangleShape backgroundBar;
+sf::RectangleShape fillBar;
+float progress = 0;
+float maxProgress = 100;
+
+const sf::Color colorTextBar = sf::Color::Yellow;
 
 bool animatingPlayer = false;
 bool returningPlayer = false;
 float maxDistancePlayer = 50.f;
 float velocityPlayer = 200.f;
 float traveledDistancePlayer = 0.f;
-sf::Vector2f startPositionPlayer(175.f, 150.f); // Position de départ
+sf::Vector2f startPositionPlayer(175.f, 150.f); // Position de dï¿½part
 
 bool animatingEnemy = false;
 bool returningEnemy = false;
 float maxDistance = 50.f;
 float velocity = 200.f;
 float traveledDistanceEnemy  = 0.f;
-sf::Vector2f startPositionEnemy(525.f, 150.f); // Position de départ
+sf::Vector2f startPositionEnemy(525.f, 150.f); // Position de dï¿½part
 
 int main()
 {
@@ -116,10 +125,12 @@ void RenderGame(sf::RenderWindow& window)
     window.draw(textLifePlayer);
     window.draw(textLevelPlayer);
     window.draw(textLifeEnemy);
+    window.draw(backgroundBar);
+    window.draw(fillBar);
+    window.draw(textPercentageAttack);
     window.draw(Attack);
     window.draw(Defense);
     window.draw(nbrEnemy);
-
 
     for (const Particle& particle : particles)
     {
@@ -130,7 +141,9 @@ void RenderGame(sf::RenderWindow& window)
 
 void Initalization() 
 {
-
+    SetBarUI(fillBar, backgroundBar, sf::Color::White, sf::Color::Red, { 470, 300}, {210, 30});
+    textPercentageAttack = EditText(std::to_string(percentageAttack) + "%", { 420, 295 }, { 1, 1 });
+    textPercentageAttack.setFillColor(colorTextBar);
     std::string fontArialPath = GetDirectories("Assets") + "arial.ttf";
     if (arialFont.loadFromFile(fontArialPath))
     {
@@ -140,7 +153,11 @@ void Initalization()
         Attack.setFont(arialFont);
         Defense.setFont(arialFont);
         nbrEnemy.setFont(arialFont);
+        textPercentageAttack.setFont(arialFont);
     }
+
+
+
     std::cout << "END INITIALIZATION" << std::endl;
 }
 
@@ -177,8 +194,11 @@ sf::Text EditText(std::string string, sf::Vector2f positionText, sf::Vector2f sc
 void NewRound()
 {
     // L'ENNEMI A ETE TUE ON LANCE UN NOUVEAU TOUR
+    percentageAttack = 0;
     indexEnemy++;
     Enemy = InitializeEnemy(Player);
+    AugmenterPercentageAttack(percentageAttack);
+    UpdateBarUI(percentageAttack, progress, maxProgress, fillBar, backgroundBar);
     std::cout << "A new enemy has appeared!" << std::endl;
     std::cout << "Enemy stats: Life = " << Enemy.Info.actualLife << ", Damage = " << Enemy.Info.damage << std::endl;
     ResetRound();
@@ -188,7 +208,6 @@ void NewRound()
 void AttackEnemy()
 {
     Player.InflictDamage(Enemy);
-    InstanceParticule(particles, 10, { 575,190 }, sf::Color::White, 25, 35, 5, 1);
     UpdateLifeTexts();
 }
 
@@ -216,7 +235,7 @@ void PlayerRound()
         but_Action_Defense.setOutlineColor(sf::Color::White);
         indexButton = 1;
     }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) // Exemple : bouton de défense
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) // Exemple : bouton de dï¿½fense
     {
         but_Action_Defense.setOutlineColor(sf::Color::Red);
         but_Action_Attack.setOutlineColor(sf::Color::White);
@@ -250,26 +269,38 @@ void IARound()
     std::cout << "IA TURN" << std::endl;
     // C'est a L'IA DE JOUER - DEFENDRE OU ATTAQUER
     if (isPlayerTurn) { return; }
-    int randomAction = GetRandomRange(1, 8);
-    if (randomAction >= 1 && randomAction <= 3)
-    {
-        std::cout << "IA INFLICT DAMAGE" << std::endl;
-        Enemy.InflictDamage(Player);
-        //BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, true);
 
-        InstanceParticule(particles, 10, { 215,190 }, sf::Color::White, 25, 35, 5, 1);
-        UpdateLifeTexts();
-    }
-    else if (randomAction >= 4 && randomAction <= 6)
+
+    int randomAction = GetRandomRange(0, 4);
+
+    if (TryPercentage(percentageAttack))
     {
-        std::cout << "DEFEND" << std::endl;
-        Enemy.Defend();
+        Enemy.InflictDamage(Player);
+        ResetPercentage(percentageAttack);
     }
-    else
+    else 
     {
-        std::cout << "ENEMY DO NOTHING" << std::endl;
+        AugmenterPercentageAttack(percentageAttack);
+        if (randomAction >= 0 && randomAction <= 2)
+        {
+            // DO NOTHING
+        }
+        else {
+            Enemy.Defend();
+        }
     }
+
+
+    UpdateBarUI(percentageAttack, progress, maxProgress, fillBar, backgroundBar);
+    textPercentageAttack.setString(std::to_string(percentageAttack) + "%");
+
     WaitFor(1000);
     ResetRound();
 
 }
+
+void PlayParticles(int numberPart, sf::Vector2f pos, sf::Color color ) 
+{
+    InstanceParticule(particles, numberPart, { pos }, color, 25, 35, 5, 1);
+}
+
