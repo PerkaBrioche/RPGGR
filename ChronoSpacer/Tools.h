@@ -14,3 +14,11 @@ void CreateRect(sf::RectangleShape& carre, float longueur, float hauteur, sf::Co
 int Clamp(int value, int min, int max);
 sf::Text EditText(std::string string, sf::Vector2f positionText, sf::Vector2f scale);
 void UpdateLifeTexts();
+void AugmenterPercentageAttack(int& actualPercentage);
+void ResetPercentage(int& actualPercentage);
+bool TryPercentage(int actualPercentage);
+void EndOfGame();
+
+void SetBarUI(sf::RectangleShape& fillBar, sf::RectangleShape& backgroundBar, sf::Color bgColor, sf::Color fillbarColor, sf::Vector2f position, sf::Vector2f scale);
+
+void UpdateBarUI(int newPercentage, float progress, float maxProgress, sf::RectangleShape& fillBar, sf::RectangleShape& backgroundBar);

@@ -24,6 +24,7 @@ struct CharacterStats
     int actualLife = baseLife;
 };
 
+
 struct Character
 {
     sf::CircleShape circleChara;
@@ -61,6 +62,13 @@ struct Character
 
     void InflictDamage(Character& enemy)
     {
+        int pourcentage = GetRandomRange(0, 100);
+        if (pourcentage < Info.criticals) 
+        {
+            enemy.ReceiveDamage(Info.damage *2);
+            std::cout << "CRITIAL HIT" << std::endl;
+            return;
+        }
         enemy.ReceiveDamage(Info.damage);
     }
 
