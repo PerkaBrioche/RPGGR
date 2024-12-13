@@ -60,8 +60,8 @@ void Update()
         float deltaTime = clock.restart().asSeconds();
         if (isPlayerTurn)
         {
-            DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
-            DoAnimation(Player.circleChara, deltaTime, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
+            //DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
+            //DoAnimation(Player.circleChara, deltaTime, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer);
             PlayerRound();
         }
         else
@@ -226,7 +226,7 @@ void PlayerRound()
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && indexButton == 1)
     {
         std::cout << "PLAYER ATTACK" << std::endl;
-        BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, false);
+        //BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, false);
         //BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, false);
         AttackEnemy();
         isPlayerTurn = false;
@@ -255,7 +255,7 @@ void IARound()
     {
         std::cout << "IA INFLICT DAMAGE" << std::endl;
         Enemy.InflictDamage(Player);
-        BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, true);
+        //BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, true);
 
         InstanceParticule(particles, 10, { 215,190 }, sf::Color::White, 25, 35, 5, 1);
         UpdateLifeTexts();
@@ -273,5 +273,6 @@ void IARound()
     ResetRound();
 
 }
+
 
 
