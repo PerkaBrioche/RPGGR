@@ -14,8 +14,8 @@ void CreateRect(sf::RectangleShape& carre, float longueur, float hauteur, sf::Co
 int Clamp(int value, int min, int max);
 sf::Text EditText(std::string string, sf::Vector2f positionText, sf::Vector2f scale);
 void UpdateLifeTexts();
-void AugmenterPercentageAttack(int& actualPercentage);
-void ResetPercentage(int& actualPercentage);
+void AugmenterPercentageAttack(int& actualPercentage, sf::Text& txt);
+void ResetPercentage(int& actualPercentage, sf::Text& txt);
 bool TryPercentage(int actualPercentage);
 void EndOfGame();
 

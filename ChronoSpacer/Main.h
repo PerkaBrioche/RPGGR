@@ -8,6 +8,7 @@
 #include "Particule.h"
 #include "Animation.h"
 
+
 void Initalization();
 void NewRound();
 void PlayerRound();
@@ -21,4 +22,6 @@ void WaitFor(float milliseconds);
 void Update();
 void ReceiveParticles(std::list<Particle> parts);
 void PlayParticles(int numberPart, sf::Vector2f pos, sf::Color color);
-
+void TriggerParticules(struct Character Chara);
+void WaitFor(float seconds);
+void PopUpXp(int xp);

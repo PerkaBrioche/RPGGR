@@ -67,16 +67,17 @@ int Clamp(int value, int min, int max)
 	return value;
 }
 
-void AugmenterPercentageAttack(int& actualPercentage)
+void AugmenterPercentageAttack(int& actualPercentage, sf::Text& txt)
 {
 	int randomValue = GetRandomRange(5, 20);
 	actualPercentage = Clamp(actualPercentage + randomValue, 0, 100);
-	std::cout << "PERCENTAGE : " << actualPercentage << std::endl;
+	txt.setString(std::to_string(actualPercentage) + "%");
 }
 
-void ResetPercentage (int& actualPercentage)
+void ResetPercentage(int& actualPercentage, sf::Text& txt)
 {
 	actualPercentage = 0;
+	txt.setString(std::to_string(actualPercentage) + "%");
 }
 
 bool TryPercentage(int actualPercentage) 

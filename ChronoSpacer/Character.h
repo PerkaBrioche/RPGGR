@@ -36,16 +36,13 @@ struct Character
     void ReceiveDamage(int damage)
     {
         std::cout << "RECEIVE DAMAGE : " << damage << std::endl;
-
         if (isDefending)
         {
             damage = Clamp(damage - Info.defense, 0, damage);
             std::cout << "DEFEND AND TANK : " << Info.defense << "DAMAGE LEFT : " << damage << std::endl;
-            PlayParticles(4, circleChara.getPosition(), sf::Color::Cyan);
         }
         else 
         {
-            PlayParticles(10, circleChara.getPosition(), sf::Color::Red);
         }
         Info.actualLife -= damage;
         if (Info.actualLife <= 0)
@@ -88,9 +85,9 @@ struct Character
 
             Info.experience = 0;
             Info.level++;
-            Info.baseLife += GetRandomRange(3, 5);
-            Info.damage += GetRandomRange(3,5);
-            Info.defense += GetRandomRange(3, 5);
+            Info.baseLife += GetRandomRange(2, 5);
+            Info.damage += GetRandomRange(1,3);
+            Info.defense += GetRandomRange(1, 3);
             Info.actualLife = Info.baseLife;
         }
     }

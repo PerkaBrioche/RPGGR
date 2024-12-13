@@ -10,6 +10,7 @@ sf::Text Attack;
 sf::Text Defense;
 sf::Text nbrEnemy;
 sf::Text textPercentageAttack;
+sf::Text textXPWon;
 sf::Font arialFont;
 
 sf::RectangleShape but_Action_Attack;
@@ -44,6 +45,11 @@ float velocity = 200.f;
 float traveledDistanceEnemy  = 0.f;
 sf::Vector2f startPositionEnemy(525.f, 150.f); // Position de d�part
 
+bool IsFading;
+
+float deltaTime;
+static float currentAlpha = 255;
+
 int main()
 {
     Initalization();
@@ -66,7 +72,7 @@ void Update()
                 window.close();
             }
         }
-        float deltaTime = clock.restart().asSeconds();
+        deltaTime = clock.restart().asSeconds();
         if (isPlayerTurn)
         {
             //DoAnimation(Enemy.circleChara, deltaTime, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy);
@@ -81,15 +87,38 @@ void Update()
         {
             clock.restart();
         }
+        if (IsFading) 
+        {
+            if (currentAlpha > 0)
+            {
+                currentAlpha -= 100 * deltaTime;
+                if (currentAlpha < 0)
+                {
+                    currentAlpha = 0;
+                }
+
+                sf::Color currentColor = textXPWon.getFillColor();
+                currentColor.a = static_cast<sf::Uint8>(currentAlpha);
+                textXPWon.setFillColor(currentColor);
+            }
+            else 
+            {
+                IsFading = false;
+            }
+        }
         UpdateParticles(particles, deltaTime);
         RenderGame(window);
     }
 }
 
-void WaitFor(float milliseconds)
+void WaitFor(float seconds)
 {
-    Sleep(milliseconds);
-    CheckLife();
+    float timer = seconds;
+    while (timer > 0) 
+    {
+        std::cout << timer << std::endl;
+        timer -= deltaTime;
+    }
 }
 
 void CheckLife() 
@@ -105,8 +134,9 @@ void CheckLife()
     {
         std::cout << "ENEMY DEFEATED" << std::endl;
         int range = Enemy.Info.baseLife;
-        Player.ReceiveXp(GetRandomRange(range - 3, range + 2));
-
+        int xpWon = GetRandomRange(range - 3, range + 2);
+        Player.ReceiveXp(xpWon);
+        PopUpXp(xpWon);
         NewRound();
 
         return;
@@ -125,6 +155,7 @@ void RenderGame(sf::RenderWindow& window)
     window.draw(textLifePlayer);
     window.draw(textLevelPlayer);
     window.draw(textLifeEnemy);
+    window.draw(textXPWon);
     window.draw(backgroundBar);
     window.draw(fillBar);
     window.draw(textPercentageAttack);
@@ -154,6 +185,7 @@ void Initalization()
         Defense.setFont(arialFont);
         nbrEnemy.setFont(arialFont);
         textPercentageAttack.setFont(arialFont);
+        textXPWon.setFont(arialFont);
     }
 
 
@@ -173,8 +205,9 @@ void CreateUI(){
     textLifePlayer = EditText("Life : " + Player.Info.actualLife, { 200.f, 100.f }, { 0.5f, 0.5f });
     textLevelPlayer = EditText("Level : " + Player.Info.level, { 195.f, 80.f }, { 0.5f, 0.5f });
     textLifeEnemy = EditText("Life : " + Enemy.Info.actualLife, { 550.f, 100.f }, { 0.5f, 0.5f });
-    Attack = EditText("Attack", { 200.f, 400.f }, { 0.5f, 0.5f });
-    Defense = EditText("Defense", { 550.f, 400.f }, { 0.5f, 0.5f });
+    textXPWon = EditText("", { 350, 100.f }, { 1, 1 });
+    Attack = EditText("Attack", { 160, 457 }, { 1.5f, 1.5f });
+    Defense = EditText("Defense", { 506, 465 }, {1.25f, 1.25f});
     nbrEnemy = EditText("Enemy " + std::to_string(indexEnemy), { 540.f, 50.f }, { 0.6f, 0.6f });
     CreateRect(but_Action_Attack, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 150.0f, 450.0f });
     CreateRect(but_Action_Defense, 150.0f, 75.0f, sf::Color::Blue, sf::Color::White, 5.0f, { 500.0f, 450.0f });
@@ -194,10 +227,10 @@ sf::Text EditText(std::string string, sf::Vector2f positionText, sf::Vector2f sc
 void NewRound()
 {
     // L'ENNEMI A ETE TUE ON LANCE UN NOUVEAU TOUR
-    percentageAttack = 0;
+    ResetPercentage(percentageAttack, textPercentageAttack);
     indexEnemy++;
     Enemy = InitializeEnemy(Player);
-    AugmenterPercentageAttack(percentageAttack);
+    AugmenterPercentageAttack(percentageAttack, textPercentageAttack);
     UpdateBarUI(percentageAttack, progress, maxProgress, fillBar, backgroundBar);
     std::cout << "A new enemy has appeared!" << std::endl;
     std::cout << "Enemy stats: Life = " << Enemy.Info.actualLife << ", Damage = " << Enemy.Info.damage << std::endl;
@@ -208,6 +241,7 @@ void NewRound()
 void AttackEnemy()
 {
     Player.InflictDamage(Enemy);
+    TriggerParticules(Enemy);
     UpdateLifeTexts();
 }
 
@@ -249,19 +283,19 @@ void PlayerRound()
         //BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, false);
         AttackEnemy();
         isPlayerTurn = false;
-        WaitFor(1000);
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && indexButton == 2)
     {
         std::cout << "PLAYER DEFEND" << std::endl;
         DefendPlayer();
         isPlayerTurn = false;
-        WaitFor(1000);
     }
 }
 
 void IARound()
 {
+    WaitFor(1);
+
     if (Enemy.isDefending)
     {
         Enemy.isDefending = false;
@@ -276,11 +310,12 @@ void IARound()
     if (TryPercentage(percentageAttack))
     {
         Enemy.InflictDamage(Player);
-        ResetPercentage(percentageAttack);
+        ResetPercentage(percentageAttack, textPercentageAttack);
+        TriggerParticules(Player);
     }
     else 
     {
-        AugmenterPercentageAttack(percentageAttack);
+        AugmenterPercentageAttack(percentageAttack, textPercentageAttack);
         if (randomAction >= 0 && randomAction <= 2)
         {
             // DO NOTHING
@@ -289,18 +324,31 @@ void IARound()
             Enemy.Defend();
         }
     }
-
+    WaitFor(1);
 
     UpdateBarUI(percentageAttack, progress, maxProgress, fillBar, backgroundBar);
-    textPercentageAttack.setString(std::to_string(percentageAttack) + "%");
+    UpdateLifeTexts();
 
-    WaitFor(1000);
     ResetRound();
-
+    CheckLife();
 }
 
-void PlayParticles(int numberPart, sf::Vector2f pos, sf::Color color ) 
+void TriggerParticules(struct Character Chara) {
+    if (Chara.isDefending) {
+        InstanceParticule(particles, 4, { Chara.circleChara.getPosition() }, sf::Color::Red, 25, 35, 10, 1);
+    }
+    else 
+    {
+        InstanceParticule(particles, 10, { Chara.circleChara.getPosition() }, sf::Color::Red, 25, 35, 10, 1);
+    }
+}
+
+void PopUpXp(int xp) 
 {
-    InstanceParticule(particles, numberPart, { pos }, color, 25, 35, 5, 1);
+    sf::Color TargetColor(0, 255, 0, 255);
+    textXPWon.setFillColor(TargetColor);
+    textXPWon.setString("XP WON : " + std::to_string(xp));
+    currentAlpha = 255;
+    IsFading = true;
 }
 
