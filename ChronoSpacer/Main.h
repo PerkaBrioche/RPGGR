@@ -10,7 +10,7 @@
 
 void Initalization();
 void NewRound();
-void PlayerRound();
+bool PlayerRound();
 void DisplaySFML();
 void ResetRound();
 void CreateUI();
