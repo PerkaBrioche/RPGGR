@@ -82,7 +82,9 @@ void Update()
                 window.close();
             }
         }
+
         float deltaTime = clock.restart().asSeconds();
+        std::cout << deltaTime << std::endl;
 
         if (step==GameStep::GameOver) {
             return;
@@ -154,7 +156,6 @@ void WaitFor(float seconds)
     float timer = seconds;
     while (timer > 0) 
     {
-        std::cout << timer << std::endl;
         timer -= deltaTime;
     }
 }
@@ -355,8 +356,7 @@ void IARound()
     maxDistance = 300.f;
     velocity = 800.f;
 
-    BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, true);
-    BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, true);
+
     int randomAction = GetRandomRange(0, 4);
 
     if (TryPercentage(percentageAttack))
@@ -365,8 +365,10 @@ void IARound()
         ResetPercentage(percentageAttack, textPercentageAttack);
         TriggerParticules(Player);
         CheckLife();
+        BeginMovement(Enemy.circleChara, startPositionEnemy, velocity, traveledDistanceEnemy, maxDistance, animatingEnemy, returningEnemy, true);
+        BeginMovement(Player.circleChara, startPositionPlayer, velocityPlayer, traveledDistancePlayer, maxDistancePlayer, animatingPlayer, returningPlayer, true);
     }
-    else 
+    else
     {
         AugmenterPercentageAttack(percentageAttack, textPercentageAttack);
         if (randomAction >= 0 && randomAction <= 2)
@@ -381,9 +383,10 @@ void IARound()
 
     UpdateBarUI(percentageAttack, progress, maxProgress, fillBar, backgroundBar);
     UpdateLifeTexts();
+}
 
-
-void TriggerParticules(struct Character Chara) {
+void TriggerParticules(struct Character Chara) 
+{
     if (Chara.isDefending) {
         InstanceParticule(particles, 4, { Chara.circleChara.getPosition() }, sf::Color::Red, 25, 35, 10, 1);
     }
